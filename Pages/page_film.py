@@ -3,12 +3,16 @@ import pandas as pd
 import requests
 import json
 
+st.set_page_config(initial_sidebar_state="collapsed")
 
 df = pd.read_csv("Data/info_film_leger.csv")
-df_film = df[df['tconst'] == "tt0117060"]
+
+imdb_id = st.session_state['selected_film']
+
+df_film = df[df['tconst'] == imdb_id]
 
 
-url_imdb_id = "https://api.themoviedb.org/3/find/tt0117060?external_source=imdb_id"
+url_imdb_id = "https://api.themoviedb.org/3/find/"+ imdb_id+ "?external_source=imdb_id"
 
 headers = {
     "accept": "application/json",
@@ -23,6 +27,7 @@ tmdb_id = info_film["movie_results"][0]["id"]
 url_credits = "https://api.themoviedb.org/3/movie/" + str(tmdb_id) + "/credits"
 response_credits = requests.get(url_credits, headers=headers)
 credits = json.loads(response_credits.text)
+
 
 ##########################################################################
 
@@ -40,43 +45,20 @@ with col2:
     #st.write("Release date : " + (df_film["startYear"].iloc[0].astype(str)))
 
 ########################## Récupération du/des réalisateurs du film
-
-    liste_director = []
-
-    for idx in range(df_film.loc[(df_film['category'] == "director"), "primaryName"].shape[0]):
-        liste_director.append(df_film.loc[(df_film['category'] == "director"), "primaryName"].iloc[idx])
+    
+    liste_director = df_film.loc[(df_film['category'] == "director"), "primaryName"].to_list()
 
     st.write("Director : " + ", ".join(liste_director))
 
-######################### Récupération des acteurs du film ########################
-
-    liste_actors = []
-
-    for idx in range(df_film.loc[(df_film['category'] == "actor") | (df_film['category'] == "actress"), "primaryName"].shape[0]):
-         
-        liste_actors.append(df_film.loc[(df_film['category'] == "actor") | (df_film['category'] == "actress"), "primaryName"].iloc[idx])
-
-   
 
 ########################## Affichage non des acteurs et images associés ##########
 
     st.write("Actors : ")
 
-    img1, img2, img3 = st.columns(3)
+    img = st.columns(3)
 
-    liste_image_acteur = []
-    for idx in range(len(credits["cast"][:3])):
-        liste_image_acteur.append(credits["cast"][idx]["profile_path"])
-
-    with img1:
-
-        st.write(liste_actors[0])
-        st.image("https://image.tmdb.org/t/p/original/" + liste_image_acteur[0])
-
-    with img2:
-        st.write(liste_actors[1])
-        st.image("https://image.tmdb.org/t/p/original/" + liste_image_acteur[1])
-
-    with img3:
-        st.write(liste_actors[2])
-        st.image("https://image.tmdb.org/t/p/original/" + liste_image_acteur[2])
+    for idx in range(3):
+        with img[idx]:
+            st.write(credits["cast"][idx]["name"])
+            if credits["cast"][idx]["profile_path"]:  
+                st.image("https://image.tmdb.org/t/p/original/" + credits["cast"][idx]["profile_path"])
