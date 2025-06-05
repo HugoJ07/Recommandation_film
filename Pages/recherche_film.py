@@ -3,14 +3,18 @@ import pandas as pd
 import requests
 import json
 
-def show():
-    headers = {
+st.set_page_config(initial_sidebar_state="collapsed")
+
+
+headers = {
         "accept": "application/json",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZGJlNWFjZDc1YmIzMWVlYTE2ZmMyY2VkMjU5YmM5ZiIsIm5iZiI6MTc0ODg1OTEyMy41MDQsInN1YiI6IjY4M2Q3OGYzMzVmOGU1MjAxODUzODM2YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.06eO4o3IsGnUgXiyrinBOs0jUrexp-CLvKUjbJruAJY"
     }
     st.title("Application de recommendation de film")
 
-    df_machin = pd.read_csv("Data/title_sup_1950.csv")
+df_machin = pd.read_csv("Data/title_sup_1950.csv")
+
+#st.write(df_machin)
 
     selected = st.selectbox("Que voulez vous rechercher ?", ['Film', 'Acteur', 'Réalisateur'])
 
@@ -19,28 +23,34 @@ def show():
         titre = df_machin["originalTitle"].str.lower().str.contains(search)
         df_title = df_machin[titre].reset_index()
 
-        if search:
-            liste_id_imdb = df_title['tconst'].to_list()
+    if search:
 
-            liste_poster_recherche = []
-            liste_id_film = []
-            for id in liste_id_imdb:
+        liste_id_imdb = df_title['tconst'].to_list()
+        dic_poster = {}
+        for idx, id in enumerate(liste_id_imdb):
+            if idx < 30 :
+
                 url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id"
+
                 response = requests.get(url, headers=headers)
+
                 data = json.loads(response.text)
 
                 try:
-                    liste_poster_recherche.append("https://image.tmdb.org/t/p/w500/" + data["movie_results"][0]["poster_path"])
-                    liste_id_film.append(id)  # Je conserve les Id qui ont marché
+                    dic_poster[id] = data["movie_results"][0]["poster_path"]
                 except:
-                    continue
+                    pass
 
-            cols = st.columns(4)
+        for id_imdb, poster in dic_poster.items():
+            if poster is not None:
+                st.image("https://image.tmdb.org/t/p/w500/" + poster)
 
-            for idx, (image, film_id) in enumerate(zip(liste_poster_recherche[:40], liste_id_film[:40])):
-                col = cols[idx % 4]
-                col.image(image, use_container_width=True)
-                if col.button("Voir les détails", key=f"detail_{idx}"):
-                    st.session_state['selected_film'] = film_id
-                    st.session_state['page'] = 'test'
-                    st.rerun()
+                if st.button("Cliquer ici pour plus d'informations", key=id_imdb):    
+                    st.session_state['selected_film'] = id_imdb
+                    st.switch_page("pages/page_film.py")  
+
+# elif selected == "Acteur": 
+#     search = st.text_input("Search movies by actor", value="")
+
+# else: 
+#     search = st.text_input("Seach movies by realisateur",value="")
