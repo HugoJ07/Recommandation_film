@@ -13,35 +13,31 @@ headers = {
     }
 st.title("Application de recommendation de film")
 
-df_machin = pd.read_csv("Data/title_sup_1950.csv")
-df_machin["title"] = df_machin["title"].str.replace(r"[^\w]", "", regex=True)
-df_machin["originalTitle"] = df_machin["originalTitle"].str.replace(r"[^\w]", "", regex=True)
-
 df_title = pd.read_csv("Data/title_sup_1950.csv")
 df_info = pd.read_csv("Data/info_film_leger.csv")
-#st.write(df_info)
+
+
+df_title["title"] = df_title["title"].str.replace(r"[^\w]", "", regex=True)
+df_title["originalTitle"] = df_title["originalTitle"].str.replace(r"[^\w]", "", regex=True)
+
+
 selected = st.selectbox("Que voulez vous rechercher ?", ['Film', 'Acteur', 'Réalisateur'])
 
 if selected == "Film":
     try :
-        
+     
         search = st.text_input("Rechercher par titre de film", value="").lower()
         search = re.sub(r"[^\w]", "", search)
-        titre_exact = (df_machin["title"].str.lower() == search) | (df_machin["originalTitle"].str.lower() == search)
-        titre_partielle = (df_machin["title"].str.lower().str.contains(search, na=False)) | (df_machin["originalTitle"].str.lower().str.contains(search, na=False))
-        df_title = pd.concat([df_machin[titre_exact].sort_values(by="startYear", ascending=False), df_machin[titre_partielle].sort_values(by="startYear", ascending=False)])
-        
+        titre_exact = (df_title["title"].str.lower() == search) | (df_title["originalTitle"].str.lower() == search)
+        titre_partielle = (df_title["title"].str.lower().str.contains(search, na=False)) | (df_title["originalTitle"].str.lower().str.contains(search, na=False))
+        df_title_filtrer = pd.concat([df_title[titre_exact].sort_values(by="startYear", ascending=False), df_title[titre_partielle].sort_values(by="startYear", ascending=False)])
 
     except:
         pass
 
-    df_title["originalTitle"] = df_title["originalTitle"].str.replace(r"[^\w\s]", "", regex=True)
-    search = st.text_input("Search movies by title", value="").lower()
-    titre = df_title["originalTitle"].str.lower().str.contains(search)
-    df_title = df_title[titre].reset_index()
     if search:
 
-        liste_id_imdb = [id for id in df_title['tconst'].unique()]
+        liste_id_imdb = [id for id in df_title_filtrer['tconst'].unique()]
         dic_poster = {}
         for idx, id in enumerate(liste_id_imdb):
             if idx < 30 :
@@ -57,7 +53,7 @@ if selected == "Film":
                     dic_poster[id] = data["movie_results"][0]["poster_path"]
                 except:
                     pass
-        
+    
         cols = st.columns(3)
 
         for idx, (id_imdb, poster) in enumerate(dic_poster.items()):
@@ -83,7 +79,6 @@ elif selected == "Acteur":
             actorName = df_info["primaryName"].str.lower().str.contains(search2, na=False) & ((df_info["category"] == "actor") | (df_info["category"] == "actress"))
             result = df_info[actorName]
             list_id_imdb = result["tconst"].tolist()
-            #st.write(list_id_imdb)
             dic_poster = {}
             for idx, id in enumerate(list_id_imdb):
                 if idx < 30 :
@@ -93,7 +88,6 @@ elif selected == "Acteur":
                     response = requests.get(url, headers=headers)
 
                     data = json.loads(response.text)
-                    #st.write(data)
 
                     try:
                         dic_poster[id] = data["movie_results"][0]["poster_path"]
@@ -117,7 +111,6 @@ elif selected == "Acteur":
 else: 
     
     search3 = st.text_input("Seach movies by realisateur",value="").lower()
-    #st.write(df_machin2)
 
     if search3:
         
@@ -125,7 +118,6 @@ else:
         
         result = df_info[directorName]
         list_id_imdb = result["tconst"].tolist()
-        #st.write(list_id_imdb)
         dic_poster = {}
         for idx, id in enumerate(list_id_imdb):
             if idx < 30 :
@@ -135,7 +127,6 @@ else:
                 response = requests.get(url, headers=headers)
 
                 data = json.loads(response.text)
-                #st.write(data)
 
                 try:
                         dic_poster[id] = data["movie_results"][0]["poster_path"]
