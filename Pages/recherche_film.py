@@ -4,6 +4,14 @@ import requests
 import json
 
 st.set_page_config(initial_sidebar_state="collapsed")
+st.markdown(
+"""
+<style>
+    [data-testid="stSidebar"] {display: none;}
+    [data-testid="stBaseButton-headerNoPadding"] {display: none;}
+</style>
+""", 
+unsafe_allow_html=True)
 
 
 headers = {
@@ -137,4 +145,4 @@ else:
 
                         if st.button("Cliquer ici pour plus d'informations", key=id_imdb,use_container_width=True):    
                             st.session_state['selected_film'] = id_imdb
-                            st.switch_page("pages/page_film.py")  
+                            st.switch_page("pages/page_film.py")
