@@ -1,5 +1,4 @@
 .DS_Store
 Data/info_film_leger.csv
 Data/info_film.csv
-Data/info_film.csv
-
+__pycache__
