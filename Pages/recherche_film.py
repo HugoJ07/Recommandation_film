@@ -5,11 +5,25 @@ import json
 import re
 
 st.set_page_config(initial_sidebar_state="collapsed")
+#header {visibility: hidden;}
+#[data-testid="stBaseButton-headerNoPadding"] {display: none;}
 st.markdown(
 """
 <style>
     [data-testid="stSidebar"] {display: none;}
-    [data-testid="stBaseButton-headerNoPadding"] {display: none;}
+    
+    .stApp{
+        background-image: url("https://static.vecteezy.com/ti/vecteur-libre/p1/16265425-salle-de-cinema-avec-ecran-blanc-rideaux-sieges-gratuit-vectoriel.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    label {
+        color: rgb(19, 23, 32) !important;
+    }
+
+
 </style>
 """, 
 unsafe_allow_html=True)
@@ -19,7 +33,10 @@ headers = {
         "accept": "application/json",
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZGJlNWFjZDc1YmIzMWVlYTE2ZmMyY2VkMjU5YmM5ZiIsIm5iZiI6MTc0ODg1OTEyMy41MDQsInN1YiI6IjY4M2Q3OGYzMzVmOGU1MjAxODUzODM2YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.06eO4o3IsGnUgXiyrinBOs0jUrexp-CLvKUjbJruAJY"
     }
-st.title("Application de recommendation de film")
+st.markdown(
+    "<h1 style='text-align: center; color:rgb(19, 23, 32);background-color: rgba(255, 255, 255, 0.5);border-radius: 8px; padding:15px;margin-bottom:20px';>Application de recommendation de film</h1>",
+    unsafe_allow_html=True
+)
 
 df_title = pd.read_csv("Data/title_sup_1950.csv")
 df_info = pd.read_csv("Data/info_film_leger.csv")
@@ -47,6 +64,8 @@ if selected == "Film":
 
         liste_id_imdb = [id for id in df_title_filtrer['tconst'].unique()]
         dic_poster = {}
+        dic_title = {}
+        dic_release = {}
         for idx, id in enumerate(liste_id_imdb):
             if idx < 30 :
 
@@ -59,6 +78,8 @@ if selected == "Film":
 
                 try:
                     dic_poster[id] = data["movie_results"][0]["poster_path"]
+                    dic_title[id] = data["movie_results"][0]["title"]
+                    dic_release[id] = data["movie_results"][0]["release_date"]
                 except:
                     pass
     
@@ -69,14 +90,47 @@ if selected == "Film":
                 col = cols[idx % 3]
                 with col:
                     with st.container():
-                        st.image("https://image.tmdb.org/t/p/w500/" + poster)
+                        url_img = "https://image.tmdb.org/t/p/w500/" + poster
+                        st.markdown(
+                            f'''
+                            <div style=" border: 2px solid black; border-radius: 8px; display: inline-block;">
+                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 6px;" />
+                            </div>
+                            ''',
+                            unsafe_allow_html=True
+                        )
+                        
+                        titre = dic_title.get(id_imdb)
+                        date = dic_release.get(id_imdb)
 
+                        st.markdown(
+                            f"""
+                                <div style='
+                                            height: 120px;
+                                            display: flex;
+                                            flex-direction: column;
+                                            justify-content: center;
+                                            text-align: center;
+                                            margin: 0 auto;
+                                            margin-bottom: 10px;
+                                            background-color: rgb(19, 23, 32);
+                                            border-radius: 12px;
+                                            padding-top: 10px;
+                                            padding-bottom: 20px;
+                                            color: white;
+                                        '>
+                                <p style='margin: 2px;'>{titre}</p>
+                                <p style='margin: 0;'>Date de sortie : {date}</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
                         if st.button("Cliquer ici pour plus d'informations", key=id_imdb,use_container_width=True):    
                             st.session_state['selected_film'] = id_imdb
                             st.switch_page("pages/page_film.py")  
 
 elif selected == "Acteur": 
-    search2 = st.text_input("Search movies by actor", value="").lower()
+    search2 = st.text_input("Recherche par nom d'acteur/actrice", value="").lower()
 
     #Changement d'approche je préfert qu'il commence par les lettre a la place de il contient.
     if search2:
@@ -88,10 +142,14 @@ elif selected == "Acteur":
             result = df_info[actorName]
             list_id_imdb = result["tconst"].tolist()
             dic_poster = {}
+            dic_title = {}
+            dic_release = {}
+
+
             for idx, id in enumerate(list_id_imdb):
                 if idx < 30 :
 
-                    url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id"
+                    url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
                     response = requests.get(url, headers=headers)
 
@@ -99,6 +157,8 @@ elif selected == "Acteur":
 
                     try:
                         dic_poster[id] = data["movie_results"][0]["poster_path"]
+                        dic_title[id] = data["movie_results"][0]["title"]
+                        dic_release[id] = data["movie_results"][0]["release_date"]
                     except:
                         pass
 
@@ -110,15 +170,48 @@ elif selected == "Acteur":
                 col = cols[idx % 3]
                 with col:
                     with st.container():
-                        st.image("https://image.tmdb.org/t/p/w500/" + poster)
+                        url_img = "https://image.tmdb.org/t/p/w500/" + poster
+                        st.markdown(
+                            f'''
+                            <div style=" border: 2px solid black; border-radius: 8px; display: inline-block;">
+                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 6px;" />
+                            </div>
+                            ''',
+                            unsafe_allow_html=True
+                        )
+                        
+                        titre = dic_title.get(id_imdb)
+                        date = dic_release.get(id_imdb)
 
+                        st.markdown(
+                            f"""
+                                <div style='
+                                            height: 120px;
+                                            display: flex;
+                                            flex-direction: column;
+                                            justify-content: center;
+                                            text-align: center;
+                                            margin: 0 auto;
+                                            margin-bottom: 10px;
+                                            background-color: rgb(19, 23, 32);
+                                            border-radius: 12px;
+                                            padding-top: 10px;
+                                            padding-bottom: 20px;
+                                            color: white;
+                                        '>
+                                <p style='margin: 2px;'>{titre}</p>
+                                <p style='margin: 0;'>Date de sortie : {date}</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
                         if st.button("Cliquer ici pour plus d'informations", key=id_imdb,use_container_width=True):    
                             st.session_state['selected_film'] = id_imdb
                             st.switch_page("pages/page_film.py")  
 
 else: 
     
-    search3 = st.text_input("Seach movies by realisateur",value="").lower()
+    search3 = st.text_input("Récherche par realisateur",value="").lower()
 
     if search3:
         
@@ -127,10 +220,13 @@ else:
         result = df_info[directorName]
         list_id_imdb = result["tconst"].tolist()
         dic_poster = {}
+        dic_title = {}
+        dic_release = {}
+
         for idx, id in enumerate(list_id_imdb):
             if idx < 30 :
 
-                url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id"
+                url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
                 response = requests.get(url, headers=headers)
 
@@ -138,6 +234,8 @@ else:
 
                 try:
                         dic_poster[id] = data["movie_results"][0]["poster_path"]
+                        dic_title[id] = data["movie_results"][0]["title"]
+                        dic_release[id] = data["movie_results"][0]["release_date"]
                 except:
                     pass
 
@@ -148,8 +246,41 @@ else:
                 col = cols[idx % 3]
                 with col:
                     with st.container():
-                        st.image("https://image.tmdb.org/t/p/w500/" + poster)
+                        url_img = "https://image.tmdb.org/t/p/w500/" + poster
+                        st.markdown(
+                            f'''
+                            <div style=" border: 2px solid black; border-radius: 8px; display: inline-block;">
+                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 6px;" />
+                            </div>
+                            ''',
+                            unsafe_allow_html=True
+                        )
+                        
+                        titre = dic_title.get(id_imdb)
+                        date = dic_release.get(id_imdb)
 
+                        st.markdown(
+                            f"""
+                                <div style='
+                                            height: 120px;
+                                            display: flex;
+                                            flex-direction: column;
+                                            justify-content: center;
+                                            text-align: center;
+                                            margin: 0 auto;
+                                            margin-bottom: 10px;
+                                            background-color: rgb(19, 23, 32);
+                                            border-radius: 12px;
+                                            padding-top: 10px;
+                                            padding-bottom: 20px;
+                                            color: white;
+                                        '>
+                                <p style='margin: 2px;'>{titre}</p>
+                                <p style='margin: 0;'>Date de sortie : {date}</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
                         if st.button("Cliquer ici pour plus d'informations", key=id_imdb,use_container_width=True):    
                             st.session_state['selected_film'] = id_imdb
-                            st.switch_page("pages/page_film.py")
+                            st.switch_page("pages/page_film.py")  
