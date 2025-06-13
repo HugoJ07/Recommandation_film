@@ -28,7 +28,7 @@ st.image("Image Pellicule.png")
 
 # introduction etude de marché
 st.header("Les cinémas Creusois en chiffres")
-st.image("Cinémas Creuse.png")
+st.image("Cinemas Creuse.png")
 
 st.image("Image Pellicule.png")
 
