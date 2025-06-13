@@ -14,7 +14,9 @@ headers = {
 st.title("Application de recommendation de film")
 
 df_title = pd.read_csv("Data/title_sup_1950.csv")
+df_title = df_title[["tconst", 'originalTitle', 'title', 'startYear']]
 df_info = pd.read_csv("Data/info_film_leger.csv")
+df_info = df_info[['tconst', 'primaryName', 'category']]
 
 
 df_title["title"] = df_title["title"].str.replace(r"[^\w]", "", regex=True)
@@ -81,9 +83,8 @@ elif selected == "Acteur":
             list_id_imdb = result["tconst"].tolist()
             dic_poster = {}
             for idx, id in enumerate(list_id_imdb):
-                if idx < 30 :
 
-                    url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id"
+                    url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
                     response = requests.get(url, headers=headers)
 
@@ -120,9 +121,8 @@ else:
         list_id_imdb = result["tconst"].tolist()
         dic_poster = {}
         for idx, id in enumerate(list_id_imdb):
-            if idx < 30 :
 
-                url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id"
+                url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
                 response = requests.get(url, headers=headers)
 
@@ -142,6 +142,6 @@ else:
                     with st.container():
                         st.image("https://image.tmdb.org/t/p/w500/" + poster)
 
-                        if st.button("Cliquer ici pour plus d'informations", key=id_imdb,use_container_width=True):    
+                        if st.button("Cliquer ici pour plus d'informations", key=id_imdb, use_container_width=True):    
                             st.session_state['selected_film'] = id_imdb
                             st.switch_page("pages/page_film.py")  
