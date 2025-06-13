@@ -14,8 +14,7 @@ st.header("Bienvenue sur l'app Ciné CreusInfo !!!!")
 
 st.session_state['selected_film'] = None
 
-
-
+st.image("Data/4d09a4ec-f506-4841-8c2d-7fb803356827.jpg")
 
 if st.button("Commencer votre expérience", use_container_width=True):
     st.session_state["bouton_reco"] = False

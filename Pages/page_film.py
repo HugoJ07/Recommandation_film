@@ -17,6 +17,28 @@ st.markdown(
 <style>
     [data-testid="stSidebar"] {display: none;}
     [data-testid="stBaseButton-headerNoPadding"] {display: none;}
+    [data-testid="stMainBlockContainer"] {max-width: 1000px;}
+    [data-testid="stColumn"] {padding:0;}
+    [data-testid="stImage"] img {
+        width: 100%;
+        height: 100%;
+        display: block;}
+    [data-testid="stHorizontalBlock"] img {
+    
+    }
+    [data-testid="stColumn"] {
+        background:rgba(19, 23, 32,0.8);
+        height: 100%;
+    }
+    [data-testid="stVerticalBlock"] {
+        text-align: center;
+    }
+    .stApp{
+        background-image: url("https://www.boxofficepro.fr/wp-content/uploads/sites/2/2020/12/salle-N%C2%B03-Atalante-1-%C2%A9-Mathieu-Prat-copie.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
 </style>
 """, 
 unsafe_allow_html=True)
@@ -70,21 +92,28 @@ with open("Data/donnees_clean_ml.pkl", 'rb') as file_donnees_model:
 
 
 ##################################################################################
-
+if st.button("Accueil", key="accueil_btn"):    
+    st.switch_page("app.py")
 st.header(details_fr['title'])
 
 col1, col2 = st.columns([2,2], border=True)
 
 with col1:
+    
     st.image("https://image.tmdb.org/t/p/original/" + details_fr['poster_path'])
 
 
 with col2:
 
-    st.write("Date de sortie : " + details_fr['release_date'])
+    st.write("**Date de sortie**: " + details_fr['release_date'])
+    list_genre= []
+    for idx in range(len(details_fr["genres"])):
+        list_genre.append(details_fr["genres"][idx]["name"])
+    genres = ', '.join(list_genre)
+    st.write("**Genre** : " + genres)
 
     note = round(details_fr['vote_average'],2)
-    st.write("Note : " + str(note) + "/10")
+    st.write("**Note** : " + str(note) + "/10")
 
     st.write(details_fr['overview'])
 
@@ -96,13 +125,13 @@ with col2:
             break
 
     try:   
-        st.write("Réalisateur : " + director)
+        st.write("**Réalisateur** : " + director)
     except:
-        st.write("Réalisateur : ")
+        st.write("**Réalisateur** : ")
 
 ########################## Affichage non des acteurs et images associés ##########
 
-    st.write("Acteurs : ")
+    st.write("**Acteurs** : ")
 
     img = st.columns(3)
     for idx in range(3):
@@ -114,19 +143,19 @@ with col2:
             except:
                 pass
 
-
 st.divider()
+
 
 try :
     short_url = video['results'][0]['key']
     url_youtube = "https://www.youtube.com/watch?v="
-    st.write("Bande annonce :")
+    st.write("**Bande annonce** :")
     st.video(url_youtube+short_url)
 except:
     try:
         short_url = video_en['results'][0]['key']
         url_youtube = "https://www.youtube.com/watch?v="
-        st.write("Bande annonce :")
+        st.write("**Bande annonce** :")
         st.video(url_youtube+short_url)
     except:
         pass
@@ -168,7 +197,14 @@ if st.session_state['bouton_reco']:
     for idx, (id_imdb_reco, poster) in enumerate(dic_poster.items()):
         if poster is not None: 
             with cols[idx]:
-                st.image("https://image.tmdb.org/t/p/w500/" + poster)
+
+                url_img = "https://image.tmdb.org/t/p/w500/" + poster
+                st.markdown(
+                        f'''
+                        <img src="{url_img}" style="height:250px; width:100%; display:block; margin-left:auto; margin-right:auto; border-radius: 8px; margin-bottom : 15px;" />
+                        ''',
+                            unsafe_allow_html=True)
+                #st.image("https://image.tmdb.org/t/p/w500/" + poster)
                 if st.button("Cliquer ici pour plus d'informations", key=id_imdb_reco):
                     st.session_state['selected_film'] = id_imdb_reco
                     st.session_state["bouton_reco"] = False

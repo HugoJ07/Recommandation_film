@@ -11,7 +11,7 @@ st.markdown(
 """
 <style>
     [data-testid="stSidebar"] {display: none;}
-    
+    header {visibility: hidden;}
     .stApp{
         background-image: url("https://static.vecteezy.com/ti/vecteur-libre/p1/16265425-salle-de-cinema-avec-ecran-blanc-rideaux-sieges-gratuit-vectoriel.jpg");
         background-size: cover;
@@ -22,7 +22,13 @@ st.markdown(
     label {
         color: rgb(19, 23, 32) !important;
     }
-
+    [data-testid="stMainBlockContainer"] {max-width: 950px;}
+    [data-testid="stMarkdownContainer"] {
+        display:flex;
+        flex-direction:column;
+        padding-top:5px;
+        margin-bottom:5px;
+    }
 
 </style>
 """, 
@@ -95,8 +101,8 @@ if selected == "Film":
                         url_img = "https://image.tmdb.org/t/p/w500/" + poster
                         st.markdown(
                             f'''
-                            <div style=" border: 2px solid black; border-radius: 8px; display: inline-block;">
-                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 6px;" />
+                            <div style="display: inline-block; border-radius: 6px">
+                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 12px;padding-top:5px" />
                             </div>
                             ''',
                             unsafe_allow_html=True
@@ -142,6 +148,7 @@ elif selected == "Acteur":
         else:
             actorName = df_info["primaryName"].str.lower().str.contains(search2, na=False) & ((df_info["category"] == "actor") | (df_info["category"] == "actress"))
             result = df_info[actorName]
+            #st.write(result)
             list_id_imdb = result["tconst"].tolist()
             dic_poster = {}
             dic_title = {}
@@ -149,8 +156,6 @@ elif selected == "Acteur":
 
 
             for idx, id in enumerate(list_id_imdb):
-
-
                     url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
                     response = requests.get(url, headers=headers)
@@ -167,7 +172,7 @@ elif selected == "Acteur":
 
         cols = st.columns(3)
 
-        for idx, (id_imdb, poster) in enumerate(dic_poster.items()):
+        for idx, (id_imdb, poster) in enumerate(list(dic_poster.items())[::-1]):
             if poster is not None:
                 col = cols[idx % 3]
                 with col:
@@ -175,13 +180,13 @@ elif selected == "Acteur":
                         url_img = "https://image.tmdb.org/t/p/w500/" + poster
                         st.markdown(
                             f'''
-                            <div style=" border: 2px solid black; border-radius: 8px; display: inline-block;">
-                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 6px;" />
+                            <div style="display: inline-block; border-radius: 6px">
+                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 12px;padding-top:5px" />
                             </div>
                             ''',
                             unsafe_allow_html=True
                         )
-                        
+
                         titre = dic_title.get(id_imdb)
                         date = dic_release.get(id_imdb)
 
@@ -242,7 +247,7 @@ else:
 
         cols = st.columns(3)
 
-        for idx, (id_imdb, poster) in enumerate(dic_poster.items()):
+        for idx, (id_imdb, poster) in enumerate(list(dic_poster.items())[::-1]):
             if poster is not None:
                 col = cols[idx % 3]
                 with col:
@@ -250,8 +255,8 @@ else:
                         url_img = "https://image.tmdb.org/t/p/w500/" + poster
                         st.markdown(
                             f'''
-                            <div style=" border: 2px solid black; border-radius: 8px; display: inline-block;">
-                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 6px;" />
+                            <div style="display: inline-block; border-radius: 6px">
+                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 12px;padding-top:5px" />
                             </div>
                             ''',
                             unsafe_allow_html=True
