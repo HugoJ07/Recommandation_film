@@ -39,7 +39,9 @@ st.markdown(
 )
 
 df_title = pd.read_csv("Data/title_sup_1950.csv")
+df_title = df_title[["tconst", 'originalTitle', 'title', 'startYear']]
 df_info = pd.read_csv("Data/info_film_leger.csv")
+df_info = df_info[['tconst', 'primaryName', 'category']]
 
 
 df_title["title"] = df_title["title"].str.replace(r"[^\w]", "", regex=True)
@@ -147,7 +149,7 @@ elif selected == "Acteur":
 
 
             for idx, id in enumerate(list_id_imdb):
-                if idx < 30 :
+
 
                     url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
@@ -224,7 +226,6 @@ else:
         dic_release = {}
 
         for idx, id in enumerate(list_id_imdb):
-            if idx < 30 :
 
                 url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
