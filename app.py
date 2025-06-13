@@ -16,7 +16,9 @@ st.session_state['selected_film'] = None
 
 
 
-if st.button("Commencer votre expérience:"):
+
+if st.button("Commencer votre expérience", use_container_width=True):
+    st.session_state["bouton_reco"] = False
     st.switch_page("pages/recherche_film.py")
 
 
