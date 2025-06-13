@@ -1,13 +1,21 @@
 import streamlit as st
 
 st.set_page_config(initial_sidebar_state="collapsed")
+st.markdown(
+"""
+<style>
+    [data-testid="stSidebar"] {display: none;}
+    [data-testid="stBaseButton-headerNoPadding"] {display: none;}
+</style>
+""", 
+unsafe_allow_html=True)
 
-st.title("Bienvenue sur l'app Ciné CreusInfo !!:clapper::clapper::clapper:")
-
-st.image("Data/4d09a4ec-f506-4841-8c2d-7fb803356827.jpg")
-
+st.header("Bienvenue sur l'app Ciné CreusInfo !!!!")
 
 st.session_state['selected_film'] = None
+
+
+
 
 if st.button("Commencer votre expérience", use_container_width=True):
     st.session_state["bouton_reco"] = False
