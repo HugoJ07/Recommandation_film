@@ -4,6 +4,13 @@ import requests
 import json
 import pickle
 
+
+if "selected_film" not in st.session_state:
+    st.warning("Aucun film sélectionné. Veuillez revenir à la page d’accueil.")
+    st.stop()
+
+imdb_id = st.session_state['selected_film']
+
 st.set_page_config(initial_sidebar_state="collapsed")
 st.markdown(
 """
@@ -16,8 +23,6 @@ unsafe_allow_html=True)
 
 
 df = pd.read_csv("Data/donnees_model_reco.csv")
-
-imdb_id = st.session_state['selected_film']
 
 df_film = df[df['tconst'] == imdb_id]
 
@@ -102,9 +107,12 @@ with col2:
     img = st.columns(3)
     for idx in range(3):
         with img[idx]:
-            st.write(credits["cast"][idx]["name"])
-            if credits["cast"][idx]["profile_path"]:  
-                st.image("https://image.tmdb.org/t/p/original/" + credits["cast"][idx]["profile_path"])
+            try:
+                st.write(credits["cast"][idx]["name"])
+                if credits["cast"][idx]["profile_path"]:  
+                    st.image("https://image.tmdb.org/t/p/original/" + credits["cast"][idx]["profile_path"])
+            except:
+                pass
 
 
 st.divider()
@@ -126,7 +134,13 @@ except:
 
 ##################### RECOMMENDATION ############################
 
-if st.button(f"Découvrez nos recommendation si {info_film['movie_results'][0]['title']} vous a plus !"):
+if "bouton_reco" not in st.session_state:
+    st.session_state["bouton_reco"] = False
+
+if st.button(f"Découvrez nos recommandations si " + details_fr['title'] + " vous a plu !", use_container_width=True):
+    st.session_state['bouton_reco'] = True
+
+if st.session_state['bouton_reco']:
 
     index_cible = df_film.index
     
@@ -138,7 +152,7 @@ if st.button(f"Découvrez nos recommendation si {info_film['movie_results'][0]['
     dic_poster = {}
     for idx, id in enumerate(id_voisins):
         if idx >= 1:     
-            url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id"
+            url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
 
             response = requests.get(url, headers=headers)
 
@@ -152,12 +166,10 @@ if st.button(f"Découvrez nos recommendation si {info_film['movie_results'][0]['
     cols = st.columns(5)
 
     for idx, (id_imdb_reco, poster) in enumerate(dic_poster.items()):
-        if poster is not None:
-            col = cols[idx]
-            with col:
+        if poster is not None: 
+            with cols[idx]:
                 st.image("https://image.tmdb.org/t/p/w500/" + poster)
-                
-
                 if st.button("Cliquer ici pour plus d'informations", key=id_imdb_reco):
                     st.session_state['selected_film'] = id_imdb_reco
+                    st.session_state["bouton_reco"] = False
                     st.switch_page("pages/page_film.py")
