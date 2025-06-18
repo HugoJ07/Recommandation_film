@@ -24,7 +24,7 @@ st.markdown(
         height: 100%;
         display: block;}
     [data-testid="stHorizontalBlock"] img {
-    
+    [data-testid="stMarkdownContainer"] p {margin:2px}
     }
     [data-testid="stColumn"] {
         background:rgba(19, 23, 32,0.8);

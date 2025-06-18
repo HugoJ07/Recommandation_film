@@ -28,6 +28,7 @@ st.markdown(
         flex-direction:column;
         padding-top:5px;
         margin-bottom:5px;
+        text-shadow: 1px 1px 1px  #302e2e ;
     }
 
 </style>
@@ -74,6 +75,7 @@ if selected == "Film":
         dic_poster = {}
         dic_title = {}
         dic_release = {}
+        dic_note = {}
         for idx, id in enumerate(liste_id_imdb):
             if idx < 30 :
 
@@ -88,6 +90,7 @@ if selected == "Film":
                     dic_poster[id] = data["movie_results"][0]["poster_path"]
                     dic_title[id] = data["movie_results"][0]["title"]
                     dic_release[id] = data["movie_results"][0]["release_date"]
+                    dic_note[id] = data["movie_results"][0]["vote_average"]
                 except:
                     pass
     
@@ -102,7 +105,7 @@ if selected == "Film":
                         st.markdown(
                             f'''
                             <div style="display: inline-block; border-radius: 6px">
-                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto; border-radius: 12px;padding-top:5px" />
+                                <img src="{url_img}" style="height:350px; width:auto; display:block; margin-left:auto; margin-right:auto;border: 2px solid black; border-radius: 12px" />
                             </div>
                             ''',
                             unsafe_allow_html=True
@@ -110,25 +113,27 @@ if selected == "Film":
                         
                         titre = dic_title.get(id_imdb)
                         date = dic_release.get(id_imdb)
-
+                        note = dic_note.get(id_imdb)
                         st.markdown(
                             f"""
                                 <div style='
                                             height: 120px;
+                                            width: 280px;
                                             display: flex;
                                             flex-direction: column;
                                             justify-content: center;
                                             text-align: center;
                                             margin: 0 auto;
                                             margin-bottom: 10px;
-                                            background-color: rgb(19, 23, 32);
+                                            background-color: rgba(19, 23, 32, 0.7);
                                             border-radius: 12px;
                                             padding-top: 10px;
                                             padding-bottom: 20px;
                                             color: white;
                                         '>
-                                <p style='margin: 2px;'>{titre}</p>
+                                <p style='margin: 8px;'>{titre}</p>
                                 <p style='margin: 0;'>Date de sortie : {date}</p>
+                                <p style='margin: 0;'>Note : {note:.2f}</p>
                             </div>
                             """,
                             unsafe_allow_html=True
@@ -153,7 +158,7 @@ elif selected == "Acteur":
             dic_poster = {}
             dic_title = {}
             dic_release = {}
-
+            dic_note = {}
 
             for idx, id in enumerate(list_id_imdb):
                     url = "https://api.themoviedb.org/3/find/"+ id +"?external_source=imdb_id&language=fr-FR"
@@ -166,6 +171,7 @@ elif selected == "Acteur":
                         dic_poster[id] = data["movie_results"][0]["poster_path"]
                         dic_title[id] = data["movie_results"][0]["title"]
                         dic_release[id] = data["movie_results"][0]["release_date"]
+                        dic_note[id] = data["movie_results"][0]["vote_average"]
                     except:
                         pass
 
@@ -189,25 +195,27 @@ elif selected == "Acteur":
 
                         titre = dic_title.get(id_imdb)
                         date = dic_release.get(id_imdb)
-
+                        note = dic_note.get(id_imdb)
                         st.markdown(
                             f"""
                                 <div style='
                                             height: 120px;
+                                            width: 280px;
                                             display: flex;
                                             flex-direction: column;
                                             justify-content: center;
                                             text-align: center;
                                             margin: 0 auto;
                                             margin-bottom: 10px;
-                                            background-color: rgb(19, 23, 32);
+                                            background-color: rgba(19, 23, 32, 0.7);
                                             border-radius: 12px;
                                             padding-top: 10px;
                                             padding-bottom: 20px;
                                             color: white;
                                         '>
-                                <p style='margin: 2px;'>{titre}</p>
+                                <p style='margin: 8px;'>{titre}</p>
                                 <p style='margin: 0;'>Date de sortie : {date}</p>
+                                <p style='margin: 0;'>Note : {note:.2f}</p>
                             </div>
                             """,
                             unsafe_allow_html=True
@@ -229,6 +237,7 @@ else:
         dic_poster = {}
         dic_title = {}
         dic_release = {}
+        dic_note = {}
 
         for idx, id in enumerate(list_id_imdb):
 
@@ -242,6 +251,7 @@ else:
                         dic_poster[id] = data["movie_results"][0]["poster_path"]
                         dic_title[id] = data["movie_results"][0]["title"]
                         dic_release[id] = data["movie_results"][0]["release_date"]
+                        dic_note[id] = data["movie_results"][0]["vote_average"]
                 except:
                     pass
 
@@ -264,25 +274,27 @@ else:
                         
                         titre = dic_title.get(id_imdb)
                         date = dic_release.get(id_imdb)
-
+                        note = dic_note.get(id_imdb)
                         st.markdown(
                             f"""
                                 <div style='
                                             height: 120px;
+                                            width: 280px;
                                             display: flex;
                                             flex-direction: column;
                                             justify-content: center;
                                             text-align: center;
                                             margin: 0 auto;
                                             margin-bottom: 10px;
-                                            background-color: rgb(19, 23, 32);
+                                            background-color: rgba(19, 23, 32, 0.7);
                                             border-radius: 12px;
                                             padding-top: 10px;
                                             padding-bottom: 20px;
                                             color: white;
                                         '>
-                                <p style='margin: 2px;'>{titre}</p>
+                                <p style='margin: 8px;'>{titre}</p>
                                 <p style='margin: 0;'>Date de sortie : {date}</p>
+                                <p style='margin: 0;'>Note : {note:.2f}</p>
                             </div>
                             """,
                             unsafe_allow_html=True
