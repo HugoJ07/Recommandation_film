@@ -10,8 +10,6 @@ st.set_page_config(initial_sidebar_state="collapsed")
 st.markdown(
 """
 <style>
-    [data-testid="stSidebar"] {display: none;}
-    header {visibility: hidden;}
     .stApp{
         background-image: url("https://static.vecteezy.com/ti/vecteur-libre/p1/16265425-salle-de-cinema-avec-ecran-blanc-rideaux-sieges-gratuit-vectoriel.jpg");
         background-size: cover;
@@ -22,13 +20,14 @@ st.markdown(
     label {
         color: rgb(19, 23, 32) !important;
     }
+    [data-testid="stSidebar"] {display: none;}
     [data-testid="stMainBlockContainer"] {max-width: 950px;}
     [data-testid="stMarkdownContainer"] {
         display:flex;
         flex-direction:column;
         padding-top:5px;
         margin-bottom:5px;
-        text-shadow: 1px 1px 1px  #302e2e ;
+        text-shadow: 1px 1px 12px white;
     }
 
 </style>
@@ -55,12 +54,12 @@ df_title["title"] = df_title["title"].str.replace(r"[^\w]", "", regex=True)
 df_title["originalTitle"] = df_title["originalTitle"].str.replace(r"[^\w]", "", regex=True)
 
 
-selected = st.selectbox("Que voulez vous rechercher ?", ['Film', 'Acteur', 'Réalisateur'])
+selected = st.selectbox("**Que voulez vous rechercher ?**", ['Film', 'Acteur', 'Réalisateur'])
 
 if selected == "Film":
     try :
      
-        search = st.text_input("Rechercher par titre de film", value="").lower()
+        search = st.text_input("**Rechercher par titre de film**", value="").lower()
         search = re.sub(r"[^\w]", "", search)
         titre_exact = (df_title["title"].str.lower() == search) | (df_title["originalTitle"].str.lower() == search)
         titre_partielle = (df_title["title"].str.lower().str.contains(search, na=False)) | (df_title["originalTitle"].str.lower().str.contains(search, na=False))
@@ -143,7 +142,7 @@ if selected == "Film":
                             st.switch_page("pages/page_film.py")  
 
 elif selected == "Acteur": 
-    search2 = st.text_input("Recherche par nom d'acteur/actrice", value="").lower()
+    search2 = st.text_input("**Recherche par nom d'acteur/actrice**", value="").lower()
 
     #Changement d'approche je préfert qu'il commence par les lettre a la place de il contient.
     if search2:
@@ -226,7 +225,7 @@ elif selected == "Acteur":
 
 else: 
     
-    search3 = st.text_input("Récherche par realisateur",value="").lower()
+    search3 = st.text_input("**Recherche par realisateur**",value="").lower()
 
     if search3:
         

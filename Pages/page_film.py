@@ -15,9 +15,8 @@ st.set_page_config(initial_sidebar_state="collapsed")
 st.markdown(
 """
 <style>
-    [data-testid="stSidebar"] {display: none;}
-    [data-testid="stBaseButton-headerNoPadding"] {display: none;}
     [data-testid="stMainBlockContainer"] {max-width: 1000px;}
+    [data-testid="stSidebar"] {display: none;}
     [data-testid="stColumn"] {padding:0;}
     [data-testid="stImage"] img {
         width: 100%;

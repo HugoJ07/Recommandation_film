@@ -21,10 +21,9 @@ st.markdown(
 <style>
     [data-testid="stMainBlockContainer"] {max-width: 950px;display:flex; align-items:center;}
     [data-testid="stSidebar"] {display: none;}
-    [data-testid="stBaseButton-headerNoPadding"] {display: none;}
     [data-testid="stHorizontalBlock"] {display: flex; align-items:center;text-align:center;}
     [data-testid="stMarkdownContainer"] p {height: 30px; margin:2px}
-    [data-testid="stMarkdownContainer"] {color :  fdf9f8  ; text-shadow: 2px 2px 2px black;}
+    [data-testid="stMarkdownContainer"] {color :  fdf9f8  ; text-shadow: 3px 3px 14px black;}
     [data-testid="stImageContainer"] {border:2px solid black ; border-radius: 6px}
 
     h2,h3 {text-align: center ;}
@@ -41,7 +40,7 @@ st.markdown(
 """, 
 unsafe_allow_html=True)
 
-st.header("Bienvenue sur l'app Ciné CreusInfo !!!!")
+st.header("Bienvenue sur l'app Ciné CreusInfo !")
 #st.write(data_act["results"])
 st.session_state['selected_film'] = None
 
