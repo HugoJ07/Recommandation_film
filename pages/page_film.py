@@ -190,16 +190,19 @@ if details_fr["belongs_to_collection"]:
 
         liste_id_saga.append(imdb_id_from_tmdb)
 
-        with colonne_saga[idx%4]:
+        try:
+            with colonne_saga[idx%4]:
 
-            url_img_saga = "https://image.tmdb.org/t/p/w500/" + collection["parts"][idx]["poster_path"]
+                url_img_saga = "https://image.tmdb.org/t/p/w500/" + collection["parts"][idx]["poster_path"]
 
-            st.image(url_img_saga)
-            
-            if st.button("Cliquer ici pour plus d'informations", key=tmdb_id_saga):
-                        st.session_state['selected_film'] = imdb_id_from_tmdb
-                        st.session_state["bouton_reco"] = False
-                        st.switch_page("pages/page_film.py")
+                st.image(url_img_saga)
+                
+                if st.button("Cliquer ici pour plus d'informations", key=tmdb_id_saga):
+                            st.session_state['selected_film'] = imdb_id_from_tmdb
+                            st.session_state["bouton_reco"] = False
+                            st.switch_page("pages/page_film.py")
+        except:
+            pass
 
     st.divider()
 else : 
