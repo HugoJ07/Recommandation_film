@@ -44,7 +44,7 @@ st.markdown(
 unsafe_allow_html=True)
 
 
-df = pd.read_csv("Data/donnees_model_reco.csv")
+df = pd.read_csv("Data/donnees_model_reco_V2.csv")
 
 df_film = df[df['tconst'] == imdb_id]
 
@@ -195,17 +195,18 @@ if st.session_state['bouton_reco']:
     cols = st.columns(5)
 
     for idx, (id_imdb_reco, poster) in enumerate(dic_poster.items()):
-        if poster is not None: 
-            with cols[idx]:
+        if poster is not None:
+            if idx < 5: 
+                with cols[idx]:
 
-                url_img = "https://image.tmdb.org/t/p/w500/" + poster
-                st.markdown(
-                        f'''
-                        <img src="{url_img}" style="height:250px; width:100%; display:block; margin-left:auto; margin-right:auto; border-radius: 8px; margin-bottom : 15px;" />
-                        ''',
-                            unsafe_allow_html=True)
-                #st.image("https://image.tmdb.org/t/p/w500/" + poster)
-                if st.button("Cliquer ici pour plus d'informations", key=id_imdb_reco):
-                    st.session_state['selected_film'] = id_imdb_reco
-                    st.session_state["bouton_reco"] = False
-                    st.switch_page("pages/page_film.py")
+                    url_img = "https://image.tmdb.org/t/p/w500/" + poster
+                    st.markdown(
+                            f'''
+                            <img src="{url_img}" style="height:250px; width:100%; display:block; margin-left:auto; margin-right:auto; border-radius: 8px; margin-bottom : 15px;" />
+                            ''',
+                                unsafe_allow_html=True)
+                    #st.image("https://image.tmdb.org/t/p/w500/" + poster)
+                    if st.button("Cliquer ici pour plus d'informations", key=id_imdb_reco):
+                        st.session_state['selected_film'] = id_imdb_reco
+                        st.session_state["bouton_reco"] = False
+                        st.switch_page("pages/page_film.py")
