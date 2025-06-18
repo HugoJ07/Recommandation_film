@@ -3,6 +3,17 @@ import pandas as pd
 import requests
 import json
 import re
+import os
+import zipfile
+import pickle
+
+zip_path = "Data/info_acteur.pkl.zip"  
+extract_folder = "Data"
+
+# Si le fichier décompressé n'existe pas encore, on dézippe
+if not os.path.exists(os.path.join(extract_folder, "info_acteur.pkl")):
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_folder)
 
 st.set_page_config(initial_sidebar_state="collapsed")
 #header {visibility: hidden;}
@@ -46,8 +57,11 @@ st.markdown(
 
 df_title = pd.read_csv("Data/title_sup_1950.csv")
 df_title = df_title[["tconst", 'originalTitle', 'title', 'startYear']]
-df_info = pd.read_csv("Data/info_film_leger.csv")
-df_info = df_info[['tconst', 'primaryName', 'category']]
+#df_info = pd.read_csv("Data/info_film_leger.csv")
+#df_info = df_info[['tconst', 'primaryName', 'category']]
+
+with open(os.path.join(extract_folder, "info_acteur.pkl"), 'rb') as f:
+    df_info = pickle.load(f)
 
 
 df_title["title"] = df_title["title"].str.replace(r"[^\w]", "", regex=True)
