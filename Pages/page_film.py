@@ -160,6 +160,51 @@ except:
     except:
         pass
 
+st.divider()
+
+###################### Film de la même saga #####################
+
+if details_fr["belongs_to_collection"]:
+    
+    id_collection = details_fr["belongs_to_collection"]["id"]
+
+    url_collection = "https://api.themoviedb.org/3/collection/" + str(id_collection) + "?language=fr-FR"
+    response_id_collection = requests.get(url_collection, headers=headers)
+    collection = json.loads(response_id_collection.text)
+
+    st.write("**Découvrez les films de la même collection :**")
+
+    colonne_saga = st.columns(4)
+
+    liste_id_saga = []
+
+    for idx in range(len(collection["parts"])):
+
+        tmdb_id_saga = collection["parts"][idx]["id"]
+        
+
+        url_imdb_from_tmdb = "https://api.themoviedb.org/3/movie/" + str(tmdb_id_saga) + "/external_ids"
+        response_imdb_from_tmdb = requests.get(url_imdb_from_tmdb, headers=headers)
+        imdbid = json.loads(response_imdb_from_tmdb.text)
+
+        imdb_id_from_tmdb = imdbid['imdb_id']
+
+        liste_id_saga.append(imdb_id_from_tmdb)
+
+        with colonne_saga[idx%4]:
+
+            url_img_saga = "https://image.tmdb.org/t/p/w500/" + collection["parts"][idx]["poster_path"]
+
+            st.image(url_img_saga)
+            
+            if st.button("Cliquer ici pour plus d'informations", key=tmdb_id_saga):
+                        st.session_state['selected_film'] = imdb_id_from_tmdb
+                        st.session_state["bouton_reco"] = False
+                        st.switch_page("pages/page_film.py")
+
+    st.divider()
+else : 
+    liste_id_saga = []
 
 ##################### RECOMMENDATION ############################
 
@@ -194,19 +239,23 @@ if st.session_state['bouton_reco']:
 
     cols = st.columns(5)
 
+    count = 0
     for idx, (id_imdb_reco, poster) in enumerate(dic_poster.items()):
-        if poster is not None:
-            if idx < 5: 
-                with cols[idx]:
+        if id_imdb_reco not in liste_id_saga:
+            if poster is not None:
+                if count < 5:
+                    
+                    with cols[count]:
+                        count += 1 
 
-                    url_img = "https://image.tmdb.org/t/p/w500/" + poster
-                    st.markdown(
-                            f'''
-                            <img src="{url_img}" style="height:250px; width:100%; display:block; margin-left:auto; margin-right:auto; border-radius: 8px; margin-bottom : 15px;" />
-                            ''',
-                                unsafe_allow_html=True)
-                    #st.image("https://image.tmdb.org/t/p/w500/" + poster)
-                    if st.button("Cliquer ici pour plus d'informations", key=id_imdb_reco):
-                        st.session_state['selected_film'] = id_imdb_reco
-                        st.session_state["bouton_reco"] = False
-                        st.switch_page("pages/page_film.py")
+                        url_img = "https://image.tmdb.org/t/p/w500/" + poster
+                        st.markdown(
+                                f'''
+                                <img src="{url_img}" style="height:250px; width:100%; display:block; margin-left:auto; margin-right:auto; border-radius: 8px; margin-bottom : 15px;" />
+                                ''',
+                                    unsafe_allow_html=True)
+                        
+                        if st.button("Cliquer ici pour plus d'informations", key=id_imdb_reco):
+                            st.session_state['selected_film'] = id_imdb_reco
+                            st.session_state["bouton_reco"] = False
+                            st.switch_page("pages/page_film.py")
