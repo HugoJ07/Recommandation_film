@@ -118,15 +118,15 @@ with col2:
 
 
 ########################## Récupération du/des réalisateurs du film ##################
+    liste_director = []
     for idx in range(len(credits['crew'])):
-        if credits['crew'][idx]['known_for_department'] == 'Directing':
-            director = credits['crew'][idx]['name']
-            break
+        if credits['crew'][idx]['job'] == 'Director':
+            liste_director.append(credits['crew'][idx]['name'])
 
     try:   
-        st.write("**Réalisateur** : " + director)
+        st.write("**Réalisateur** : " + ', '.join(liste_director))
     except:
-        st.write("**Réalisateur** : ")
+       st.write("**Réalisateur** : ")
 
 ########################## Affichage non des acteurs et images associés ##########
 
