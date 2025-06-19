@@ -1,84 +1,87 @@
 # j'importe les bibliothèque
+import requests
+import json
+
+from datetime import datetime, timedelta
+
 import streamlit as st
 import pandas as pd
+import numpy as np
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import style
+
+import altair as alt
 
 st.markdown(
 """
 <style>
     [data-testid="stSidebar"] {display: none;}
-    
+    [data-testid="stMainBlockContainer"] {max-width:1000px}
+
 </style>
 """, 
 unsafe_allow_html=True)
 
 # j'importe les données
 
-df_fr = pd.read_csv('df_fr.csv', sep=',')
-df_us = pd.read_csv('df_en.csv', sep=',')
-top_10_fr = pd.read_csv('top_10_fr.csv', sep=',')
+df_fr = pd.read_csv('fichiers_dashboard/df_fr.csv', sep=',')
+df_us = pd.read_csv('fichiers_dashboard/df_en.csv', sep=',')
+top_10_fr = pd.read_csv('fichiers_dashboard/top_10_fr.csv', sep=',')
+
+#  les transformation faites en cours pour les visualisations
+df_fr['release_year'] = df_fr['release_year'].apply(lambda x: str(x))
+df_fr = df_fr[df_fr['tranche_age'] != '0 - 10']
+df_fr = df_fr[df_fr['tranche_age'] != '10 - 20']
+
+top_10_fr = top_10_fr[top_10_fr['tranche_age'] != '0 - 10']
+top_10_fr = top_10_fr[top_10_fr['tranche_age'] != '10 - 20']
+
+df_us = df_us[df_us['tranche_age'] != '0 - 10']
+df_us = df_us[df_us['tranche_age'] != '10 - 20']
 
 ## -------------------------------------------------------------------------------------------------------------------------##
 
 st.title("Cinéma : Qui Joue, Quoi Plaît ? ")
 st.header (' "C’est pas parce qu’on comprend pas que c’est pas logique" ')
-st.image("Image Pellicule.png")
-
-# introduction etude de marché
-st.header("Les cinémas Creusois en chiffres")
-st.image("Cinemas Creuse.png")
-
-st.image("Image Pellicule.png")
+st.image("fichiers_dashboard/Image Pellicule.png",use_container_width=True)
 
 # le cinéma français
 st.subheader("Les acteurs du cinéma français")
 st.text("Films de 2000 à nos jours")
 
-## -------------------------------------------------------------------------------------------------------------------------##
-
 #  répartition des genre par tranche d'age (nbre d'acteur par genre et par tranche d'age) pour les films de 2000 à nos jours
 
-# POUR AVOIR LES TRANCHES D'AGE EN ORDRE CHRONOLOGIQUE
-# Définir l'ordre souhaité
-ordre_tranches = ['0 - 10', '10 - 20', '20 - 30', '30 - 40',
-                  '40 - 50', '50 - 60', '60 - 70', '70 - 80', '80 - 90', '90 - 100']
+# Menu déroulant avec les genres disponibles
+liste_genres = df_fr['genres_concat'].unique().tolist()
+liste_genres.sort()
 
-# Convertir la colonne en catégorie ordonnée
-df_fr['tranche_age'] = pd.Categorical(df_fr['tranche_age'],
-                                      categories=ordre_tranches,
-                                      ordered=True)
+genre_selectionne = st.selectbox("Choisissez un genre", options=liste_genres, key="liste_genres")
 
-couleurs = {'Comedy':'#1F77B4',
-            'Action':'#D62728',
-            'Drama':'#FF7F0E',
-            'Thriller':'#7F7F7F',
-            'ScienceFiction':'#17BECF',
-            'Crime':'#FF9896',
-            'Family':'#98DF8A',
-            'Romance':'#F7B6D2',
-            }
+# Filtrage du DataFrame selon le genre choisi
+df_filtré = df_fr[df_fr['genres_concat'] == genre_selectionne]
 
+# Création du graphique
+y_max = 4500
+chart = alt.Chart(df_filtré).mark_bar().encode(
+                                                x=alt.X('tranche_age:N', title='Tranche d\'âge', 
+                                                sort=['20 - 30', '30 - 40', '40 - 50', '50 - 60', '60 - 70', '70 - 80', '80 - 90', '90 - 100'],axis=alt.Axis(labelAngle=45)),
+                                                y=alt.Y('count():Q', title='Nombre d\'acteurs', scale=alt.Scale(domain=[0, y_max])),
+                                                tooltip=['tranche_age', 'count()']
+                                            ).properties(
+                                                        title=f"Répartition des acteurs par tranche d'âge pour le genre : {genre_selectionne}",
+                                                        width=600,
+                                                        height=400
+                                                        )
 
-plt.figure(figsize=(10, 5))
-countplot = sns.countplot(data=df_fr,
-                          x='tranche_age',
-                          hue='genres_concat',
-                          palette= couleurs
-                          )
-plt.title("Répartition des acteurs/actrices par genres en fonction de leur tranche d'âge")
-plt.xticks(rotation=45)
-plt.xlabel("Tranches d'ages")
-plt.ylabel("Nombre d'acteurs")
-plt.show()
-st.pyplot(countplot.get_figure())
+st.altair_chart(chart, use_container_width=True)
 
-st.image("Image Pellicule.png")
+st.image("fichiers_dashboard/Image Pellicule.png",use_container_width=True)
 
 ## -------------------------------------------------------------------------------------------------------------------------##
 
-# top 10 par genre et tranche d'age
+# # top 10 par genre et tranche d'age
 
 st.subheader("TOP 10 des acteurs par genre et tranche d'âge")
 st.text("Films de 2000 à nos jours")
@@ -96,7 +99,8 @@ resultat_1 = top_10_fr['genres_concat'].str.contains(selected_genre_1)  & (top_1
 ## Afficher les données filtrées
 st.write(top_10_fr[resultat_1])
 
-st.image("Image Pellicule.png")
+st.image("fichiers_dashboard/Image Pellicule.png",use_container_width=True)
+
 
 ## -------------------------------------------------------------------------------------------------------------------------##
 
@@ -131,98 +135,52 @@ resultat_2 = top_10_acteurs["tranche_age"] == selected_age_2
 ## Afficher les données filtrées
 st.write(top_10_acteurs[resultat_2])
 
-st.image("Image Pellicule.png")
-
+st.image("fichiers_dashboard/Image Pellicule.png",use_container_width=True)
 
 ## -------------------------------------------------------------------------------------------------------------------------##
+# Liste de film par acteur 
+st.subheader("Les films par acteur")
+st.text("Films de 2000 à nos jours")
+
+# choix utilisateur
+choix_acteur = st.selectbox("Nom de l'acteur",df_fr["primaryName"].unique())
+
+# toutes les lignes avec le nom de l'acteur
+film = df_fr[df_fr['primaryName'].str.contains(choix_acteur)]
+
+# filtrage pour juste colonne titre et date de sortie
+film_affichage = film[['primaryName', 'original_title', 'release_year']].drop_duplicates().sort_values('release_year', ascending=False)
+
+st.write(film_affichage)
 
 
 #----------------------------------------------------------FILMS ARTS ET ESSAIS 2024
 
+#----------------------------------------------------------FILMS ARTS ET ESSAIS 2024
 # LE FICHIER :
-df_ae24 = pd.read_excel("Films_Art_Essais_2024.xlsx")
-
+df_ae24 = pd.read_excel("fichiers_dashboard/Films_Art_Essais_2024.xlsx")
 # Nettoyage de la colonne Boxoffice
 df_ae24['BoxOffice'] = df_ae24['BoxOffice'].replace('NC', 0)
 df_ae24['BoxOffice'] = df_ae24['BoxOffice'].astype(int)
-
 # Fonction pour convertir les durée de films en heure en minutes :
 def convertir_en_minutes(x):
     heures = int(x)
     minutes = (x - heures) * 100  # On multiplie par 100 car les minutes sont en décimal style 0.40 = 40 minutes
     return heures * 60 + minutes
-
 # Application de la fonction de conversion heurs/minutes
 df_ae24['duree_minutes'] = df_ae24['Durée'].apply(convertir_en_minutes)
 df_ae24['duree_minutes'] = df_ae24['duree_minutes'].astype(int)
-
 # Calcule de la durée moyenne des films
 df_ae24['mean_duree'] = df_ae24['duree_minutes'].round(-1)
 moyenne_entrees = df_ae24.groupby('mean_duree')['BoxOffice'].mean()
-
 #--------------------------------------------------------------STREAMLIT
-# -------------------------------------------------------------
-# FILMS ARTS ET ESSAIS 2024
-
-# Titre
-st.header("Les films Art & Essais")
-st.image("subventions.png")
-
-# couleur des genres A&E dans les viz
-genres_ae = sorted(df_ae24['Genre'].unique())
-
-genre_ae_palette = {    
-    'Comédie':'#1F77B4',
-    'Musical':'#C49C94',
-    'Drame':'#FF7F0E',
-    'Documentaire':'#8C564B',
-    'Thriller':'#7F7F7F',
-    'Biopic':'#E377C2',
-    'Jeune Public':'#9EDAE5',
-    'Horreur':'#BCBD22'  
-}
-
-# Visuel 1       ### Histogramme du boxoffice par genre
-st.subheader('Le Boxoffice des films Art & Essais en 2024 en fonction du genre')
-
-from matplotlib.ticker import FuncFormatter
-# Agrégation du BoxOffice par genre
-boxoffice_par_genre = df_ae24.groupby('Genre')['BoxOffice'].sum().sort_values(ascending=False)
-# Fonction de formatage en millions
-def millions(x, _):
-    if x >= 1_000_000:
-        return f'{x/1_000_000:.1f} M'.replace('.', ',')  # "2,0 M" pour 2 millions
-    elif x >= 100_000:
-        return f'{x/1_000_000:.1f} M'.replace('.', ',')  # "0,5 M" pour 500 000
-    else:
-        return f'{int(x):,}'.replace(',', ' ')  # Valeur brute si < 100 000
-# Création du plot avec les données agrégées
-plt.figure(figsize=(10,5))
-sns.barplot(
-    x=boxoffice_par_genre.index,
-    y=boxoffice_par_genre.values,
-    palette=genre_ae_palette
-)
-# Application du format personnalisé
-plt.gca().yaxis.set_major_formatter(FuncFormatter(millions))
-plt.title("Nombre d'entrées par genre de films Art & Essais en 2024")
-plt.xlabel('Genre')
-plt.ylabel('Box Office')
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
-
-st.pyplot(plt.gcf())
-
+# ------------------------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------FILMS PATRIMOINE 2025
-
 # LE FICHIER :
-df_patrim25 = pd.read_excel("Films_Patrimoine_2025.xlsx")
-
+df_patrim25 = pd.read_excel("fichiers_dashboard/Films_Patrimoine_2025.xlsx")
 # couleur des genres patrimoine dans les viz
 genres = sorted(df_patrim25['Genre'].unique())    # il me faut une liste des genres
-
-genre_palette = {    
+genre_palette = {
     'Comédie':'#1F77B4',
     'Action':'#D62728',
     'Drame':'#FF7F0E',
@@ -231,84 +189,171 @@ genre_palette = {
     'Biopic':'#E377C2',
     'Aventure':'#2CA02C',
     'Fantastique':'#17BECF',
-    'court-métrage':'#9467BD'  
+    'court-métrage':'#9467BD'
 }
-
-# Visuel 4      ### Histogramme des genres 
+st.header("Les films Patrimoine en 2025")
+# Visuel 1      ### Histogramme des genres
 nb_films_par_genre = df_patrim25.groupby('Genre')['Film'].count()
-
-st.subheader("Les films patrimoine réédités en 2025 classés par genre")
+st.subheader('Les films patrimoine réédités en 2025 par genre')
 plt.figure(figsize=(10,5))
 sns.barplot(data=nb_films_par_genre, palette=genre_palette)
-plt.title("Nombre de film patrimoine par genre à l'affiche en 2025")
-plt.xlabel('Genre du film classée Patrimoine')
-plt.ylabel('Nombre de film par genre')
+plt.title("Nombre de films patrimoine par genre réédités en 2025")
+plt.xlabel('Genre')
+plt.ylabel('Nombre de films')
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
-
 st.pyplot(plt.gcf())
-
-st.image("Image Pellicule.png")
-
-
-# Visuel 6      ### Histogramme par décénie et par genre
-
+# Visuel 2 PAT      ### Histogramme par décénie et par genre
 # le nombre de genre par année de création
 df_patrim25['periode'] = (df_patrim25['Sortie initiale']//10)*10
-
 # j'importe matplotlib.ticker afin d'avoir l'echelle de l'axe y en nombre entier
 from matplotlib.ticker import MaxNLocator, MultipleLocator
-
-st.subheader('Les films patrimoine réédités en 2025 selon leurs périodes de réalisation') 
-
+st.subheader('Les films patrimoine par périodes de réalisation')
 plt.figure(figsize=(10,5))
 sns.countplot(data=df_patrim25, x='periode', hue='Genre', palette=genre_palette, hue_order=genres)
-plt.title("Nombre de films patrimoine réédités en 2025    (classés par genre et par décénie de réalisation)")
+plt.title("Nombre de films patrimoine par genre et par décénie de réalisation")
 plt.xlabel('Période de réalisation')
-plt.ylabel('Nombre de films réalisés')
+plt.ylabel('Nombre de films')
 plt.ylim(0, 25)
 plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
 plt.gca().yaxis.set_major_locator(MultipleLocator(5))
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
-
+st.pyplot(plt.gcf())
+# Visuel 3 PAT      ### Histogramme du Nombre de films patrimoine par pays
+st.subheader('Les films patrimoine par pays')
+plt.figure(figsize=(10,5))
+sns.countplot(data=df_patrim25, x='Origin', order=(df_patrim25['Origin'].value_counts().sort_values(ascending=False).index))
+plt.title("Nombre de films patrimoine par pays")
+plt.xlabel('Pays')
+plt.ylabel('Nombre de films')
+plt.ylim(0, 25)
+plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+plt.gca().yaxis.set_major_locator(MultipleLocator(5))
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+st.pyplot(plt.gcf())
+# Visuel 4 PAT     ### les films patrimoine classé par pays
+st.subheader('Les films patrimoine par genres et par pays')
+plt.figure(figsize=(10,5))
+sns.countplot(data=df_patrim25, x='Origin', hue='Genre', palette=genre_palette, hue_order=genres, order=(df_patrim25['Origin'].value_counts().sort_values(ascending=False).index))
+plt.title("Nombre de genres de films patrimoine par pays")
+plt.xlabel('Pays')
+plt.ylabel('Nombre de films')
+plt.ylim(0, 25)
+plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+plt.gca().yaxis.set_major_locator(MultipleLocator(5))
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+st.pyplot(plt.gcf())
+#-------------------------------------------------------------------------------------------------------------------------------------
+# FILMS ARTS ET ESSAIS 2024
+# Titre
+st.header("Les films Art & Essais")
+# couleur des genres A&E dans les viz
+genres_ae = sorted(df_ae24['Genre'].unique())
+genre_ae_palette = {
+    'Comédie':'#1F77B4',
+    'Musical':'#C49C94',
+    'Drame':'#FF7F0E',
+    'Documentaire':'#8C564B',
+    'Thriller':'#7F7F7F',
+    'Biopic':'#E377C2',
+    'Animation':'#9EDAE5',
+    'Horreur':'#BCBD22'
+}
+# Visuel 1 AE      ### Histogramme du boxoffice par genre
+st.subheader('Le Boxoffice des films Art & Essais par genre')
+plt.figure(figsize=(10,5))
+sns.barplot(data=df_ae24, x='Genre', y='BoxOffice', ci=None, palette=genre_ae_palette, order=genres_ae)
+plt.title("Nombre d'entrée par genre de films Art & Essais en 2024")
+plt.xlabel('Genre du film classé Art & Essais')
+plt.ylabel('Box Office')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+st.pyplot(plt.gcf())
+#Visuel 2 AE       ### Histogramme du nombre de films Art & Essais par pays
+st.subheader('Les films Art & Essais par pays')
+plt.figure(figsize=(10,5))
+sns.countplot(data=df_ae24, x='Origin',order=(df_ae24['Origin'].value_counts().sort_values(ascending=False).index))
+plt.title("Nombre de films Art & Essais par pays")
+plt.xlabel('Pays')
+plt.ylabel('Nombre de films')
+plt.ylim(0, 20)
+plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+plt.gca().yaxis.set_major_locator(MultipleLocator(5))
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+st.pyplot(plt.gcf())
+# Visuel 3 AE      ### les films Art & Essais par genre et par pays
+st.subheader('Les films Art & Essais par genres et par pays')
+plt.figure(figsize=(10,5))
+sns.countplot(data=df_ae24, x='Origin', hue='Genre', palette=genre_ae_palette, hue_order=genres_ae, order=(df_ae24['Origin'].value_counts().sort_values(ascending=False).index))
+plt.title("Nombre de genres de films patrimoine par pays")
+plt.xlabel('Pays')
+plt.ylabel('Nombre de films')
+plt.ylim(0, 20)
+plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+plt.gca().yaxis.set_major_locator(MultipleLocator(5))
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
 st.pyplot(plt.gcf())
 
-st.image("Image Pellicule.png")
+
+
+
+
+
+
+
+
+
+
+st.image("fichiers_dashboard/Image Pellicule.png",use_container_width=True)
 
 # Répartion des genres US:
 
-st.subheader("Répartitions des acteurs par genre et tranche d'âge pour les films americains")
+st.subheader("Clap de fin avec les acteurs américains par genre et tranche d’âge")
 st.text("Films de 2000 à nos jours")
 
-# POUR AVOIR LES TRANCHES D'AGE EN ORDRE CHRONOLOGIQUE
-# Définir l'ordre souhaité
-ordre_tranches = ['0 - 10', '10 - 20', '20 - 30', '30 - 40',
-                  '40 - 50', '50 - 60', '60 - 70', '70 - 80', '80 - 90', '90 - 100']
+# Menu déroulant avec les genres disponibles
+liste_genres_us = df_us['genres_concat'].unique().tolist()
+liste_genres_us.sort()
 
-# Convertir la colonne en catégorie ordonnée
-df_us['tranche_age'] = pd.Categorical(df_us['tranche_age'],
-                                      categories=ordre_tranches,
-                                      ordered=True)
+genre_selectionne_us = st.selectbox("Choisissez un genre", options=liste_genres_us, key="liste_genres_us")
 
-# countplot us
-plt.figure(figsize=(10, 5))
-countplot_us = sns.countplot(data=df_us,
-                          x='tranche_age',
-                          hue='genres_concat',
-                          palette= couleurs
-                          )
-plt.title("Répartition des acteurs/actrices par genres en fonction de leur tranche d'âge")
-plt.xticks(rotation=45)
-plt.xlabel("Tranches d'ages")
-plt.ylabel("Nombre d'acteurs")
-plt.show()
-st.pyplot(countplot_us.get_figure())
+# Filtrage du DataFrame selon le genre choisi
+df_filtré_us = df_us[df_us['genres_concat'] == genre_selectionne_us]
+df_filtré_us = df_filtré_us[df_filtré_us['tranche_age'].notna()]
 
+# Création du graphique
 
-st.image("Image Pellicule.png")
+# Création du graphique
+y_max = 30000
+chart_us = alt.Chart(df_filtré_us).mark_bar().encode(
+                                                x=alt.X('tranche_age:N', title='Tranche d\'âge', 
+                                                sort=['20 - 30', '30 - 40', '40 - 50', '50 - 60', '60 - 70', '70 - 80', '80 - 90', '90 - 100'],axis=alt.Axis(labelAngle=45)),
+                                                y=alt.Y('count():Q', title='Nombre d\'acteurs', scale=alt.Scale(domain=[0, y_max])),
+                                                tooltip=['tranche_age', 'count()']
+                                            ).properties(
+                                                        title=f"Répartition des acteurs par tranche d'âge pour le genre : {genre_selectionne_us}",
+                                                        width=600,
+                                                        height=400
+                                                        )
+
+st.altair_chart(chart_us, use_container_width=True)
+
+cols = st.columns(3)
+
+with cols[1]:
+    st.image("fichiers_dashboard/Image clap.png")
 
 ## -------------------------------------------------------------------------------------------------------------------------##
 
